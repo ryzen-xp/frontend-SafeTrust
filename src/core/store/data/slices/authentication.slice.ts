@@ -9,7 +9,7 @@ const AUTHENTICATION_ACTIONS = {
 
 export const useGlobalAuthenticationSlice: StateCreator<
   AuthenticationGlobalStore,
-  [["zustand/devtools", never]],
+  [["zustand/devtools", never], ["zustand/persist", Partial<AuthenticationGlobalStore>]],
   [],
   AuthenticationGlobalStore
 > = (set) => {

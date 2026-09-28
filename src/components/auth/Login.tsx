@@ -10,15 +10,12 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import Illustration from "@/components/auth/ui/Illustration";
 import { useGlobalAuthenticationStore } from "@/core/store/data";
+import { useWallet } from "@/hooks/useWallet";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
 import { auth } from "@/lib/firebase";
-import { useMultiWallet } from "./wallet/hooks/multi-wallet.hook";
-import { MainWalletSelectionModal } from "./wallet/components/MainWalletSelectionModal";
-import { WalletSelectionModal } from "./wallet/components/WalletSelectionModal";
-import { MetaMaskWalletModal } from "./wallet/components/MetaMaskWalletModal";
 import { toast } from "sonner";
 
 const ERROR_MESSAGES: Record<string, string> = {
@@ -31,18 +28,7 @@ const ERROR_MESSAGES: Record<string, string> = {
 
 export default function LoginPage() {
   const { address, token } = useGlobalAuthenticationStore();
-  const {
-    handleConnect,
-    isMainModalOpen,
-    isStellarModalOpen,
-    isMetaMaskModalOpen,
-    closeMainModal,
-    closeStellarModal,
-    closeMetaMaskModal,
-    handleWalletTypeSelected,
-    handleStellarWalletSelected,
-    handleMetaMaskSelected,
-  } = useMultiWallet();
+  const { connect } = useWallet();
 
   const router = useRouter();
   const pathname = usePathname();
@@ -51,6 +37,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isConnectingWallet, setIsConnectingWallet] = useState(false);
 
   useEffect(() => {
     if ((address || token) && pathname === "/login") {
@@ -89,6 +76,20 @@ export default function LoginPage() {
       }
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleWalletConnect = async () => {
+    try {
+      setIsConnectingWallet(true);
+      await connect();
+      router.push("/dashboard/escrow-dashboard");
+    } catch (err) {
+      toast.error("Failed to connect wallet. Please try again.", {
+        duration: 4000,
+      });
+    } finally {
+      setIsConnectingWallet(false);
     }
   };
 
@@ -180,10 +181,11 @@ export default function LoginPage() {
             <Button
               variant="outline"
               className="w-full bg-black text-white"
-              onClick={handleConnect}
+              onClick={handleWalletConnect}
+              disabled={isConnectingWallet}
             >
               <Wallet className="mr-2 h-4 w-4" />
-              Login with wallet
+              {isConnectingWallet ? "Connecting..." : "Login with wallet"}
             </Button>
           </div>
 
@@ -197,22 +199,6 @@ export default function LoginPage() {
       </div>
 
       <Illustration />
-
-      <MainWalletSelectionModal
-        isOpen={isMainModalOpen}
-        onClose={closeMainModal}
-        onWalletTypeSelected={handleWalletTypeSelected}
-      />
-      <WalletSelectionModal
-        isOpen={isStellarModalOpen}
-        onClose={closeStellarModal}
-        onWalletSelected={handleStellarWalletSelected}
-      />
-      <MetaMaskWalletModal
-        isOpen={isMetaMaskModalOpen}
-        onClose={closeMetaMaskModal}
-        onWalletConnected={handleMetaMaskSelected}
-      />
     </div>
   );
 }

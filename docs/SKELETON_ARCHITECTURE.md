@@ -31,17 +31,37 @@ src/providers/
 
 These exist so `layout.tsx` compiles without pulling in wallet SDK or Apollo dependencies.
 
-## Auth store (skeleton mode)
+## Auth store
 
 ```typescript
 // src/core/store/data/index.ts
-// Pre-seeded with mock values:
-address:     "mock-owner-1"
-token:       "mock-jwt-token"
-isConnected: true
+// Persisted Zustand store with localStorage key "safetrust-wallet"
+
+interface AuthenticationGlobalStore {
+  address: string;      // persisted
+  name: string;         // persisted (wallet name: "Freighter", "Albedo", etc.)
+  token: string;        // NOT persisted (session-only, never written to localStorage)
+  connectWalletStore(address: string, name: string): void;
+  setToken(token: string): void;
+  disconnectWalletStore(): void;
+  clearAuth(): void;
+}
 ```
 
-`disconnectWalletStore()` resets to these same values — so the user is never truly logged out in skeleton mode.
+**Initialization:**
+- On first load, store initializes to `{ address: "", name: "", token: "" }`
+- When a wallet is connected via `@/hooks/useWallet`, the `address` and `name` are persisted to `localStorage["safetrust-wallet"]`
+- On page refresh, Zustand's `persist` middleware hydrates the store from localStorage
+
+**Usage:**
+```typescript
+import { useWallet } from "@/hooks/useWallet";
+
+const { address, name, isConnected, connect, disconnect, sign } = useWallet();
+// address and name are automatically persisted and restored across browser sessions
+```
+
+This replaces the previous unsynchronized state split between Zustand (lost on refresh) and a broken localStorage fallback.
 
 ## Mutation stubs
 

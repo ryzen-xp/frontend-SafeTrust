@@ -5,39 +5,36 @@ import {
   AlbedoModule,
   FreighterModule,
 } from "@creit.tech/stellar-wallets-kit";
+import { getWalletKit, signXdr as canonicalSignXdr } from "@/lib/stellar/wallet-kit";
+import { STELLAR_NETWORK } from "@/lib/stellar/wallet-kit";
 
-/**
- * Stellar Wallet Kit
- *
- * @description The Stellar Wallet Kit is used to connect to the wallet
- * @description The Stellar Wallet Kit is used to sign transactions
- * @description The Stellar Wallet Kit is used to get the wallet address
- */
-export const kit: StellarWalletsKit = new StellarWalletsKit({
-  network: WalletNetwork.TESTNET,
-  selectedWalletId: FREIGHTER_ID,
-  modules: [new FreighterModule(), new AlbedoModule()],
-});
+// Re-export the canonical kit functions
+export { getWalletKit, STELLAR_NETWORK };
+export const signXdr = canonicalSignXdr;
 
+// Backward compatibility adapter for legacy signTransaction function
 interface SignTransactionParams {
   unsignedTransaction: string;
   address: string;
 }
 
 /**
- * Sign Transaction Params
- *
- * @param unsignedTransaction - The unsigned transaction
- * @param address - The address of the wallet
+ * @deprecated Use signXdr() from @/lib/stellar/wallet-kit instead
+ * This adapter delegates to the canonical signXdr function
  */
 export const signTransaction = async ({
   unsignedTransaction,
   address,
 }: SignTransactionParams): Promise<string> => {
-  const { signedTxXdr } = await kit.signTransaction(unsignedTransaction, {
-    address,
-    networkPassphrase: WalletNetwork.TESTNET,
-  });
+  return canonicalSignXdr(unsignedTransaction, address);
+};
 
-  return signedTxXdr;
+// Keep the old `kit` export for backward compatibility, but it's a getter now
+export const kit = {
+  openModal: (options: any) => getWalletKit().openModal(options),
+  setWallet: (walletId: string) => getWalletKit().setWallet(walletId),
+  getAddress: () => getWalletKit().getAddress(),
+  disconnect: () => getWalletKit().disconnect(),
+  signTransaction: (xdr: string, options: any) =>
+    getWalletKit().signTransaction(xdr, options),
 };

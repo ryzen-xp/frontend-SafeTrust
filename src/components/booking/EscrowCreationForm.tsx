@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useWallet } from "@/components/auth/wallet/hooks/wallet.hook";
+import { useWallet } from "@/hooks/useWallet";
 import { useBookingEscrow } from "@/hooks/useBookingEscrow";
 import {
   BookingData,
@@ -320,7 +320,7 @@ export function EscrowCreationForm({
   className = "",
 }: EscrowCreationFormProps) {
   const router = useRouter();
-  const { address: walletAddress, connectWallet } = useWallet();
+  const { address: walletAddress, connect } = useWallet();
   const [showForm, setShowForm] = useState(false);
 
   const {
@@ -359,7 +359,7 @@ export function EscrowCreationForm({
           hotelData={hotelData}
           escrowType={escrowType}
         />
-        <WalletConnectionPrompt onConnect={connectWallet} />
+        <WalletConnectionPrompt onConnect={connect} />
       </div>
     );
   }

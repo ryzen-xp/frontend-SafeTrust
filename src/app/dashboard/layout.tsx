@@ -18,11 +18,6 @@ const Layout = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Check for wallet in localStorage as fallback (for Trustless Work wallet)
-        const hasWalletInStorage =
-          localStorage.getItem("walletAddress") ||
-          localStorage.getItem("address-wallet");
-
         setIsLoading(false);
       } catch (error) {
         console.error("Authentication error:", error);

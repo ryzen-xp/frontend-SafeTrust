@@ -4,11 +4,10 @@ import React, { useState } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useWallet } from "@/components/auth/wallet/hooks/wallet.hook";
+import { useWallet } from "@/hooks/useWallet";
 import { TransactionPreview } from "./TransactionPreview";
 import { XDRSigningFlowProps, TransactionResult } from "./types";
 import { Loader2, AlertCircle, CheckCircle } from "lucide-react";
-import { WalletNetwork } from "@creit.tech/stellar-wallets-kit";
 
 export function XDRSigningFlow({
   escrowAction,
@@ -17,7 +16,7 @@ export function XDRSigningFlow({
   apiKey,
   network = "testnet"
 }: XDRSigningFlowProps) {
-  const { signXDR, address, name } = useWallet();
+  const { sign: signXDR, address, name } = useWallet();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<TransactionResult | null>(null);
@@ -32,11 +31,8 @@ export function XDRSigningFlow({
       setIsLoading(true);
       setError(null);
       
-      const networkPassphrase = network === 'mainnet' 
-        ? WalletNetwork.PUBLIC 
-        : WalletNetwork.TESTNET;
-
-      const signedXDR = await signXDR(unsignedXDR, networkPassphrase);
+      // signXDR from the canonical hook handles network internally
+      const signedXDR = await signXDR(unsignedXDR);
 
       const headers: HeadersInit = {
         'Content-Type': 'application/json'

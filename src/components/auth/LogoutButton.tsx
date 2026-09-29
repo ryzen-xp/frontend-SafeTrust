@@ -6,16 +6,16 @@ import { useRouter } from "next/navigation";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useGlobalAuthenticationStore } from "@/core/store/data";
-import { useWallet } from "@/components/tw-blocks/wallet-kit/useWallet";
+import { useWallet } from "@/hooks/useWallet";
 
 export function LogoutButton() {
   const router = useRouter();
   const clearAuth = useGlobalAuthenticationStore((state) => state.clearAuth);
-  const { handleDisconnect } = useWallet();
+  const { disconnect } = useWallet();
 
   const handleLogout = async () => {
-    await handleDisconnect();
     try {
+      await disconnect();
       await signOut(auth);
     } catch (error) {
       console.error("Error signing out:", error);

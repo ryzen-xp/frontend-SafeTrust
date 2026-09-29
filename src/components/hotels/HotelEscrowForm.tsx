@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { useWallet } from "@/components/auth/wallet/hooks/wallet.hook";
+import { useWallet } from "@/hooks/useWallet";
 import {
   BookingData,
   HotelData,
@@ -158,7 +158,7 @@ export function HotelEscrowForm({
   onEscrowCreated,
   onCancel,
 }: HotelBookingEscrowProps) {
-  const { address: guestWallet, connectWallet } = useWallet();
+  const { address: guestWallet, connect } = useWallet();
 
   const {
     escrowFormData,
@@ -186,7 +186,7 @@ export function HotelEscrowForm({
 
   // Not connected state
   if (!isWalletConnected) {
-    return <WalletNotConnected onConnect={connectWallet} />;
+    return <WalletNotConnected onConnect={connect} />;
   }
 
   // Single Release Escrow

@@ -23,8 +23,12 @@ export const signTransaction = async ({
 };
 
 // Keep the old `kit` export for backward compatibility, but it's a getter now
+type OpenModalOptions = Parameters<
+  ReturnType<typeof getWalletKit>["openModal"]
+>[0];
+
 export const kit = {
-  openModal: (options: Record<string, unknown>) => getWalletKit().openModal(options),
+  openModal: (options: OpenModalOptions) => getWalletKit().openModal(options),
   setWallet: (walletId: string) => getWalletKit().setWallet(walletId),
   getAddress: () => getWalletKit().getAddress(),
   disconnect: () => getWalletKit().disconnect(),

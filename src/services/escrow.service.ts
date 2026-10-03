@@ -1,7 +1,7 @@
 import { signXdr } from "@/lib/stellar/wallet-kit";
 import { useGlobalAuthenticationStore } from "@/core/store/data";
 import http from "@/core/config/axios/http";
-import { EscrowContract } from "@/interfaces/escrow.interface";
+import { EscrowContract } from "@/types/escrow-contract";
 
 interface InitializedEscrowProps {
   hotelName: string;

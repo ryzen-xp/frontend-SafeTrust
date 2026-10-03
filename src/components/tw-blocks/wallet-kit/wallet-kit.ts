@@ -1,10 +1,3 @@
-import {
-  StellarWalletsKit,
-  WalletNetwork,
-  FREIGHTER_ID,
-  AlbedoModule,
-  FreighterModule,
-} from "@creit.tech/stellar-wallets-kit";
 import { getWalletKit, signXdr as canonicalSignXdr } from "@/lib/stellar/wallet-kit";
 import { STELLAR_NETWORK } from "@/lib/stellar/wallet-kit";
 
@@ -31,10 +24,10 @@ export const signTransaction = async ({
 
 // Keep the old `kit` export for backward compatibility, but it's a getter now
 export const kit = {
-  openModal: (options: any) => getWalletKit().openModal(options),
+  openModal: (options: Record<string, unknown>) => getWalletKit().openModal(options),
   setWallet: (walletId: string) => getWalletKit().setWallet(walletId),
   getAddress: () => getWalletKit().getAddress(),
   disconnect: () => getWalletKit().disconnect(),
-  signTransaction: (xdr: string, options: any) =>
+  signTransaction: (xdr: string, options: Record<string, unknown>) =>
     getWalletKit().signTransaction(xdr, options),
 };

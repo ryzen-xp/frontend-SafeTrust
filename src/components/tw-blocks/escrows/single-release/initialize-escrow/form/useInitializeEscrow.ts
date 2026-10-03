@@ -115,7 +115,7 @@ export function useInitializeEscrow() {
 
       // Use the approver address as the signer (they're the same - the person initiating)
       // Priority: 1) roles.approver from form, 2) walletAddress from context
-      let signerAddress = payload.roles?.approver || walletAddress;
+      const signerAddress = payload.roles?.approver || walletAddress;
 
       if (!signerAddress) {
         toast.error("Please connect your wallet first");

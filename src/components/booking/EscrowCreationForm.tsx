@@ -319,14 +319,14 @@ export function EscrowCreationForm({
   onCancel,
   className = "",
 }: EscrowCreationFormProps) {
-  const router = useRouter();
+  const _router = useRouter();
   const { address: walletAddress, connect } = useWallet();
   const [showForm, setShowForm] = useState(false);
 
   const {
-    escrowFormData,
+    _escrowFormData,
     milestones,
-    totalAmount,
+    _totalAmount,
     isValid,
     validationErrors,
   } = useBookingEscrow({
@@ -339,13 +339,13 @@ export function EscrowCreationForm({
   const isWalletConnected = useMemo(() => Boolean(walletAddress), [walletAddress]);
 
   // Handle escrow creation success
-  const handleSuccess = (data: unknown) => {
+  const _handleSuccess = (data: unknown) => {
     console.log("✅ Escrow created successfully:", data);
     onEscrowCreated(data as EscrowResponse);
   };
 
   // Handle escrow creation error
-  const handleError = (error: unknown) => {
+  const _handleError = (error: unknown) => {
     console.error("❌ Escrow creation failed:", error);
     // Error handling is done by the form component
   };

@@ -116,7 +116,7 @@ export function useInitializeEscrow() {
 
       // Use the approver address as the signer (they're the same - the person initiating)
       // Priority: 1) roles.approver from form, 2) walletAddress from context
-      let signerAddress = payload.roles?.approver || walletAddress;
+      const signerAddress = payload.roles?.approver || walletAddress;
 
       if (!signerAddress) {
         toast.error("Please connect your wallet first");
@@ -140,7 +140,6 @@ export function useInitializeEscrow() {
 
       // Remove receiver from roles (not allowed in multi-release API)
       const { receiver: _receiver, ...rolesWithoutReceiver } = payload.roles;
-      void _receiver;
 
       /**
        * Create the final payload for the initialize escrow mutation

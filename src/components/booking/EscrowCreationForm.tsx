@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useWallet } from "@/hooks/useWallet";
+import { useEscrowContext } from "@/components/tw-blocks/providers/EscrowProvider";
 import { useBookingEscrow } from "@/hooks/useBookingEscrow";
 import {
   BookingData,
@@ -319,9 +319,29 @@ export function EscrowCreationForm({
   onCancel,
   className = "",
 }: EscrowCreationFormProps) {
-  const _router = useRouter();
   const { address: walletAddress, connect } = useWallet();
+  const { selectedEscrow, clearEscrow } = useEscrowContext();
   const [showForm, setShowForm] = useState(false);
+  const reportedContractId = useRef<string | null>(null);
+
+  useEffect(() => {
+    clearEscrow();
+  }, [clearEscrow]);
+
+  useEffect(() => {
+    if (
+      showForm &&
+      selectedEscrow?.contractId &&
+      reportedContractId.current !== selectedEscrow.contractId
+    ) {
+      reportedContractId.current = selectedEscrow.contractId;
+      onEscrowCreated({
+        contractId: selectedEscrow.contractId,
+        status: "created",
+        unsignedXDR: (selectedEscrow as { unsignedXDR?: string }).unsignedXDR,
+      });
+    }
+  }, [selectedEscrow, showForm, onEscrowCreated]);
 
   const {
     _escrowFormData,

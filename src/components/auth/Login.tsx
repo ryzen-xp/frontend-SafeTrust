@@ -10,13 +10,14 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import Illustration from "@/components/auth/ui/Illustration";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
-import { setSessionCookie } from "@/lib/auth/session";
 import { useGlobalAuthenticationStore } from "@/core/store/data";
 import { useEffect, useState, useCallback } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
 import { auth } from "@/lib/firebase";
+import { applyRememberMe } from "@/lib/auth/persistence";
+import { setSessionCookie } from "@/lib/auth/session";
 import { useWallet } from "@/hooks/useWallet";
 import { toast } from "sonner";
 
@@ -52,6 +53,7 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [remember, setRemember] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [error, setError] = useState("");
@@ -70,6 +72,7 @@ export default function LoginPage() {
     setError("");
 
     try {
+      await applyRememberMe(remember);
       const credential = await signInWithEmailAndPassword(
         auth,
         email,
@@ -78,6 +81,7 @@ export default function LoginPage() {
       const idToken = await credential.user.getIdToken();
 
       setSessionCookie(idToken);
+      useGlobalAuthenticationStore.getState().setToken(idToken);
 
       toast.success("Login successful!", {
         description: "Redirecting to your dashboard...",
@@ -93,8 +97,8 @@ export default function LoginPage() {
         setError(ERROR_MESSAGES[err.code] ?? "Login failed — please try again");
       } else {
         toast.error("An unexpected error occurred. Please try again.", {
-          duration: 4000,
-        });
+          duration: 4000 },
+        );
         setError("Login failed — please try again");
       }
     } finally {
@@ -104,6 +108,7 @@ export default function LoginPage() {
 
   const handleWalletConnect = async () => {
     try {
+      await applyRememberMe(remember);
       await connect();
       router.push(getSafeRedirect());
     } catch (error) {
@@ -123,10 +128,13 @@ export default function LoginPage() {
 
           <form className="space-y-4" onSubmit={handleLogin}>
             <div className="space-y-2">
-              <Label htmlFor="email">Email or username</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
+                name="email"
                 type="email"
+                inputMode="email"
+                autoComplete="username"
                 placeholder="Enter your email"
                 required
                 value={email}
@@ -140,7 +148,10 @@ export default function LoginPage() {
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
+                name="password"
                 type="password"
+                autoComplete="current-password"
+                placeholder="Enter your password"
                 required
                 value={password}
                 onChange={(e) => {
@@ -151,14 +162,19 @@ export default function LoginPage() {
             </div>
 
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Checkbox id="remember" />
-                <label
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="remember"
+                  name="remember"
+                  checked={remember}
+                  onCheckedChange={(v) => setRemember(v === true)}
+                />
+                <Label
                   htmlFor="remember"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  className="font-normal text-sm cursor-pointer peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
-                  Remember me
-                </label>
+                  Keep me signed in on this device
+                </Label>
               </div>
               <Link
                 href="/forgot-password"
@@ -198,9 +214,11 @@ export default function LoginPage() {
               label="Continue with Google"
               disabled={isAnyAuthLoading}
               onLoadingChange={setIsGoogleLoading}
+              onBeforeSignIn={() => applyRememberMe(remember)}
             />
 
             <Button
+              type="button"
               variant="outline"
               className="w-full bg-black text-white"
               onClick={handleWalletConnect}

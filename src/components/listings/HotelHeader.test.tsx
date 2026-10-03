@@ -4,7 +4,10 @@ import HotelHeader from './HotelHeader';
 
 jest.mock('next/image', () => ({
   __esModule: true,
-  default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => <img {...props} />,
+  default: ({ priority: _priority, ...props }: React.ImgHTMLAttributes<HTMLImageElement> & { priority?: boolean }) => (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img alt="" {...props} />
+  ),
 }));
 
 jest.mock('@/components/ui/ThemeToggle', () => ({

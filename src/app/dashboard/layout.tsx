@@ -44,7 +44,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
     );
   }
 
-  // Show error state only for protected routes that failed authentication
+  // Show error state
   if (isAuthError) {
     return null;
   }

@@ -15,8 +15,11 @@ export function LogoutButton() {
 
   const handleLogout = async () => {
     try {
-      await disconnect();
-      await signOut(auth);
+      await Promise.allSettled([disconnect(), signOut(auth)]).then((results) =>
+        results.forEach((r) => {
+          if (r.status === "rejected") console.error("Error signing out:", r.reason);
+        })
+      );
     } catch (error) {
       console.error("Error signing out:", error);
     } finally {
